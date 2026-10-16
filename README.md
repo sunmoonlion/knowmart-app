@@ -1,106 +1,16 @@
-# tpl-app
+# knowmart-app
 
-App Platform Architecture v2 的规范应用模板。默认实例固定由两个 Next.js 前端和一个
-FastAPI Backend 组成：
+**knowmart**：分身（knowbot）的存放与「请」。现在只做**私有模式**——每个用户只看得到、只请得到自己的分身，一个人可以有多个；后端强制按所有者过滤，界面叫「我的分身」。对外上架给别人用、开发者资格与审核是持牌以后的事。
+
+由 [tpl-app](https://github.com/sunmoonlion/tpl-app) 实例化（tpl-app 4b19daf，2026-10-16）：
 
 ```text
-tpl-app/
-├── tpl-backend/                 # Admin/Web/Internal 共用的领域 Backend
-├── tpl-admin-frontend/          # Next.js 管理端
-├── tpl-web-frontend/            # Next.js 用户端
-└── k8s-deployment/              # 稳定的 App 总量/组件级 Kubernetes 生成与部署入口
+knowmart-app/
+├── knowmart-backend/          FastAPI 后端（Admin / Web / Internal 三面一个工程）
+├── knowmart-web-frontend/     Next.js 网页端
+└── knowmart-admin-frontend/   Next.js 管理端
 ```
 
-## 默认组件
+设计、规则、部署都在并列的 `k8s` 仓：先读 `../k8s/docs/project-guide/overall-architecture.md`，本应用的设计见 `../k8s/docs/dev-investment-agent/tree-build/SDD/modules/0018-advisor-market.md`（私有模式）与 `0026-knowlab.md`「一之二」；动代码前读 `../k8s/docs/dev-investment-agent/tree-build/rules/constraints.md`（含合规 `C-L*`）。构建与部署由 k8s 仓的发布链做，本仓不放部署脚本。
 
-| 组件 | 技术栈 | 职责 |
-| --- | --- | --- |
-| `tpl-backend` | FastAPI / Python 3.12 | 领域、数据所有权、Admin/Web/Internal API、异步任务 |
-| `tpl-admin-frontend` | Next.js / React | 管理和治理表面 |
-| `tpl-web-frontend` | Next.js / React | 用户产品表面、SSR/SEO 和交互体验 |
-
-Admin 与 Web 是两个独立浏览器表面，但调用同一个 Backend。Backend 是唯一数据所有者，
-前端和 Next.js BFF 不得直接拥有领域数据。
-
-## Backend 运行角色
-
-Worker 仍是生产必需能力，但不再是独立源码工程。`tpl-backend` 的同一个不可变镜像按不同命令
-运行：
-
-- API：`uvicorn app.bootstrap.api:app ...`
-- Worker：`celery -A app.bootstrap.worker:celery_app worker ...`
-- Scheduler：`celery -A app.bootstrap.scheduler:celery_app beat ...`
-- Migration：`python -m app.bootstrap.migration`
-
-四个角色使用独立 ServiceAccount、数据库 principal、消息凭据、资源、探针和扩缩容策略。
-规范部署声明由 [k8s-deployment/README.md](k8s-deployment/README.md) 生成；禁止恢复
-`celeryworker-*`、`nodebullworker-*` 或旧 `k8s-scaffold/` 源码副本。
-
-## 历史参考实现
-
-React Router Admin、Vue Admin 与 NestJS Backend 已从模板活动子模块移至独立的
-`repo-backup` 仓库。它们只用于源码对照和恢复，不进入默认实例化链、release bundle 或当前
-配对验收。`template-release-manifest.json` 中出现的同名路径仅是历史 2.0.0 验收记录，不能
-解释为当前工作树组件。
-
-旧 FastAPI `tpl-web-backend` 已在 Architecture v2 配对、迁移和回滚门禁完成后从父仓活动拓扑
-解除；远端仓库、冻结提交和历史 release manifest 继续提供审计与恢复能力。
-
-## 初始化新 App
-
-只在新克隆的、可丢弃的模板工作树执行：
-
-```bash
-git clone --recurse-submodules --branch architecture-v2 \
-  https://github.com/sunmoonlion/tpl-app.git new-app
-cd new-app
-./init.sh tools sunmoonlion
-```
-
-脚本会把三个默认组件改为 `tools-backend`、`tools-admin-frontend`、
-`tools-web-frontend`，并更新 GitHub 子模块地址。远端目标仓必须在
-推送前创建；推送顺序始终是“子仓先推，父仓后提交 gitlink”。
-
-`init.sh` 是一次性、原地转换工具，不得在权威 `tpl-app` 工作树直接执行。公共能力后续变更仍须
-先进入模板、通过配对与 K8s 门禁，再同步到实例，不能靠重复运行初始化脚本覆盖领域代码。
-
-## Backend 本地验证
-
-```bash
-cd tpl-backend/app
-uv sync --frozen
-uv run ruff check .
-uv run pyright
-uv run pytest -q
-```
-
-## Kubernetes 模板验证
-
-```bash
-python3 -m unittest discover -s k8s-deployment/tests -v
-python3 verify_template_release.py
-```
-
-正式部署镜像必须使用 `repository@sha256:...`，不能使用可变 tag。R3/R4 的冻结模板 release
-仍由 `template-release-manifest.json` 描述；该文件记录历史验收对象，不随父仓清理而重写。
-其中 `test_evidence` 是当时的路径，不保证在当前工作树存在；按 K8s 仓库
-`sunmoonai/docs/legacy-backlog/verification-index.md` 的固定 Git 版本读取完整原文。
-
-开发环境晋级生产的配置分层、Secret、PVC 和完整切换检查表见
-[dev-to-prod-deploy](dev-to-prod-deploy/README.md)。
-
-## 子模块协作
-
-GitHub `origin` 是规范远端，Gitee `gitee` 是镜像远端。修改活动子模块时先在子仓提交和推送，
-再回父仓提交 gitlink。更新工作树：
-
-```bash
-git pull --ff-only
-git submodule sync --recursive
-git submodule update --init --recursive
-```
-
-当前架构与发布入口见 `k8s` 仓库的 `docs/project-guide/`；
-开发约束见 `sunmoonai/docs/dev-agent-task/SDD/constraints.md`。
-本批修复的部署与回滚前置见 `sunmoonai/docs/legacy-backlog/deployment-checklist.md`，
-旧重构计划通过同目录的 `verification-index.md` 查询，不再作为当前施工指令。
+**现在只是空应用**：模板的骨架、认证与运行角色，没有业务功能。

@@ -1,9 +1,9 @@
-[submodule "tpl-web-frontend"]
-	path = tpl-web-frontend
-	url = https://github.com/sunmoonlion/tpl-web-frontend.git
-[submodule "tpl-backend"]
-	path = tpl-backend
-	url = https://github.com/sunmoonlion/tpl-backend.git
-[submodule "tpl-admin-frontend"]
-	path = tpl-admin-frontend
-	url = https://github.com/sunmoonlion/tpl-admin-frontend.git
+[submodule "knowmart-backend"]
+	path = knowmart-backend
+	url = https://github.com/sunmoonlion/knowmart-backend.git
+[submodule "knowmart-admin-frontend"]
+	path = knowmart-admin-frontend
+	url = https://github.com/sunmoonlion/knowmart-admin-frontend.git
+[submodule "knowmart-web-frontend"]
+	path = knowmart-web-frontend
+	url = https://github.com/sunmoonlion/knowmart-web-frontend.git
