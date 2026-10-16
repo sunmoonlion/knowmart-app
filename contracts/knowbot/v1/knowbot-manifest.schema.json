@@ -1,0 +1,125 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.sunmoonai.com/knowmart/knowbot/v1/knowbot-manifest.schema.json",
+  "$defs": {
+    "DataBinding": {
+      "additionalProperties": false,
+      "description": "这一版运行时能读的一份用户数据：knowlab 的数据集、版本与内容摘要。\n\nC-L2：分身运行时只读用户自己的数据。",
+      "properties": {
+        "dataset_id": {
+          "pattern": "^[A-Za-z0-9._:-]{1,128}$",
+          "title": "Dataset Id",
+          "type": "string"
+        },
+        "version": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Version",
+          "type": "string"
+        },
+        "sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        }
+      },
+      "required": [
+        "dataset_id",
+        "version",
+        "sha256"
+      ],
+      "title": "DataBinding",
+      "type": "object"
+    },
+    "RuleSource": {
+      "additionalProperties": false,
+      "description": "一条判断规则出自哪里（C-L1：投资逻辑只来自用户）。",
+      "properties": {
+        "rule": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Rule",
+          "type": "string"
+        },
+        "source": {
+          "enum": [
+            "user_text",
+            "user_confirmed"
+          ],
+          "title": "Source",
+          "type": "string"
+        },
+        "ref": {
+          "maxLength": 500,
+          "minLength": 1,
+          "title": "Ref",
+          "type": "string"
+        }
+      },
+      "required": [
+        "rule",
+        "source",
+        "ref"
+      ],
+      "title": "RuleSource",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema": {
+      "const": "knowbot-manifest/v1",
+      "title": "Schema",
+      "type": "string"
+    },
+    "name": {
+      "maxLength": 80,
+      "minLength": 1,
+      "title": "Name",
+      "type": "string"
+    },
+    "tagline": {
+      "default": "",
+      "maxLength": 200,
+      "title": "Tagline",
+      "type": "string"
+    },
+    "version": {
+      "pattern": "^[1-9][0-9]{0,5}$",
+      "title": "Version",
+      "type": "string"
+    },
+    "pack": {
+      "additionalProperties": true,
+      "title": "Pack",
+      "type": "object"
+    },
+    "data_bindings": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/DataBinding"
+      },
+      "maxItems": 64,
+      "title": "Data Bindings",
+      "type": "array"
+    },
+    "rule_sources": {
+      "items": {
+        "$ref": "#/$defs/RuleSource"
+      },
+      "maxItems": 500,
+      "minItems": 1,
+      "title": "Rule Sources",
+      "type": "array"
+    }
+  },
+  "required": [
+    "schema",
+    "name",
+    "version",
+    "pack",
+    "rule_sources"
+  ],
+  "title": "knowbot-manifest v1 (outer envelope; `pack` is owned by the executor)",
+  "type": "object"
+}
