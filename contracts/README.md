@@ -6,7 +6,7 @@
 
 - schema：`knowbot/v1/knowbot-manifest.schema.json`，摘要见同目录 `contract-manifest.json`
 - 生成：由 `knowmart-backend` 的外层模型 `app/domain/knowbots/manifest.py` 生成（`python -m app.domain.knowbots.schema`），后端测试核文件与模型逐字一致，不要手改
-- 生产方：knowlab（工程化、验收后交付）；存放方：knowmart；执行方：investment 工作台
+- 生产方：knowlab（工程化、验收后交付）；存放方：knowmart；执行方：knowbench 工作台
 
 只管**外层**：格式标识 `schema`、名字与说明、版本、`data_bindings`（这一版能读的用户数据）、`rule_sources`（每条判断规则出自用户原文还是用户确认过的改写，`C-L1`）。`pack` 是可执行部分（步骤、验收、底稿的形状），由执行方工作台拥有、按自己的模型完整校验，这里只要求它是带 `pack_id`、`version`、非空 `workflow` 的对象。
 
