@@ -15,3 +15,10 @@ JSON Schema 表达不了的跨字段规则以 knowmart 交付时的校验为准�
 `data_needs` 为空、绑定上没写 `need` 时，这两样不进规范 JSON：2026-10-23 加这两样之前交付的清单，摘要一字不变。摘要是外层规范 JSON（键排序、紧凑分隔、UTF-8）的 sha256，写作 `sha256:<十六进制>`；同一分身同一版本只认一份内容。
 
 不兼容的改动开新主版本目录，并留双版本并存期。
+
+## 交付与停用（内部接口，服务关系 `knowmart:deliver`）
+
+knowlab 调，只认 knowlab 的服务身份（SDD 0027、0037 第十八之二节）：
+
+- `POST /internal/v1/knowmart/deliveries`：交一版过了两道门的专家（`delivery_id`、`owner_subject`、`knowbot_ref`、`manifest`）。按交付单号幂等：同一单号内容一样回 200，不一样回 409。版本号按清单里的记（knowlab 测试通过时定，可以有空号）。可带 `request_public: true`（knowlab 运营审核定了公开）：卖家发布主体与类目资质都过的，这一位进上架审核，不过的留自用、不报错；回包多 `listing_status`。
+- `POST /internal/v1/knowmart/owners/{owner}/knowbots/{knowbot_id}/versions/{version}/stop`：knowlab 停用某一版（那边用户或运营停的）。只认这个所有者的，别人的与没有的都是 404；停过的再停照样 204。
