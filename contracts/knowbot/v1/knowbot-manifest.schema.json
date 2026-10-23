@@ -4,7 +4,7 @@
   "$defs": {
     "DataBinding": {
       "additionalProperties": false,
-      "description": "这一版运行时能读的一份用户数据：knowlab 的数据集、版本与内容摘要。\n\nC-L2：分身运行时只读用户自己的数据。",
+      "description": "这一版运行时能读的一份用户数据：knowlab 的数据集、版本与内容摘要。\n\nC-L2：分身运行时只读用户自己的数据。新格式里只出现在 knowlab 的测试绑定中（交到这里\n的不带），`need` 写它对应声明里的哪一样。",
       "properties": {
         "dataset_id": {
           "pattern": "^[A-Za-z0-9._:-]{1,128}$",
@@ -21,6 +21,19 @@
           "pattern": "^[0-9a-f]{64}$",
           "title": "Sha256",
           "type": "string"
+        },
+        "need": {
+          "anyOf": [
+            {
+              "pattern": "^[a-z][a-z0-9_]{0,39}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Need"
         }
       },
       "required": [
@@ -29,6 +42,115 @@
         "sha256"
       ],
       "title": "DataBinding",
+      "type": "object"
+    },
+    "DataNeed": {
+      "additionalProperties": false,
+      "description": "数据需求声明里的一样（SDD 0042 第五节第 3 项）：要请专家的人提供什么。\n\n请专家时按这一样从本地或云端知识库选 min_count 到 max_count 份；必填的缺了不能开始。\n格式沿用 knowlab 收的几种：PDF、Excel（xlsx、xls）、CSV、文本（txt、md）。",
+      "properties": {
+        "key": {
+          "pattern": "^[a-z][a-z0-9_]{0,39}$",
+          "title": "Key",
+          "type": "string"
+        },
+        "name": {
+          "maxLength": 80,
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "description": {
+          "default": "",
+          "maxLength": 500,
+          "title": "Description",
+          "type": "string"
+        },
+        "formats": {
+          "items": {
+            "enum": [
+              "pdf",
+              "excel",
+              "csv",
+              "text"
+            ],
+            "type": "string"
+          },
+          "maxItems": 4,
+          "minItems": 1,
+          "title": "Formats",
+          "type": "array"
+        },
+        "required": {
+          "default": true,
+          "title": "Required",
+          "type": "boolean"
+        },
+        "min_count": {
+          "default": 1,
+          "maximum": 64,
+          "minimum": 1,
+          "title": "Min Count",
+          "type": "integer"
+        },
+        "max_count": {
+          "default": 1,
+          "maximum": 64,
+          "minimum": 1,
+          "title": "Max Count",
+          "type": "integer"
+        },
+        "tables": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/DataTable"
+          },
+          "maxItems": 20,
+          "title": "Tables",
+          "type": "array"
+        }
+      },
+      "required": [
+        "key",
+        "name",
+        "formats"
+      ],
+      "title": "DataNeed",
+      "type": "object"
+    },
+    "DataTable": {
+      "additionalProperties": false,
+      "description": "表格类数据要有的一张表与几列（按表头的字认，不按位置）。\n\nCSV 没有表名，sheet 不写。",
+      "properties": {
+        "sheet": {
+          "anyOf": [
+            {
+              "maxLength": 100,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Sheet"
+        },
+        "columns": {
+          "items": {
+            "maxLength": 100,
+            "minLength": 1,
+            "type": "string"
+          },
+          "maxItems": 50,
+          "minItems": 1,
+          "title": "Columns",
+          "type": "array"
+        }
+      },
+      "required": [
+        "columns"
+      ],
+      "title": "DataTable",
       "type": "object"
     },
     "RuleSource": {
@@ -98,6 +220,15 @@
       "additionalProperties": true,
       "title": "Pack",
       "type": "object"
+    },
+    "data_needs": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/DataNeed"
+      },
+      "maxItems": 20,
+      "title": "Data Needs",
+      "type": "array"
     },
     "data_bindings": {
       "default": [],
