@@ -20,6 +20,6 @@ JSON Schema 表达不了的跨字段规则以 knowmart 交付时的校验为准�
 
 knowlab 调，只认 knowlab 的服务身份（SDD 0027、0037 第十八之二节）：
 
-- `POST /internal/v1/knowmart/deliveries`：交一版过了两道门的专家（`delivery_id`、`owner_subject`、`knowbot_ref`、`manifest`）。按交付单号幂等：同一单号内容一样回 200，不一样回 409。版本号按清单里的记（knowlab 测试通过时定，可以有空号）。可带 `request_public: true`（knowlab 运营审核定了公开）：卖家发布主体与类目资质都过的，这一位进上架审核，不过的留自用、不报错；回包多 `listing_status`。
-- `POST /internal/v1/knowmart/owners/{owner}/knowbots/{knowbot_id}/versions/{version}/stop`：knowlab 停用某一版（那边用户或运营停的）。只认这个所有者的，别人的与没有的都是 404；停过的再停照样 204。
-- `PUT /internal/v1/knowmart/owners/{owner}/sources/{knowbot_ref}/unlisted/{version}`，body `{"outcome": "declined" | "rejected"}`：knowlab 交来没上架的那一版的结局（用户不要 / 运营审核没过），详情页写明空号那一版。按版本逐条写，结局是终态，重发、乱序都无害（Astra 评审 F08）；这个引用已交付过而主人不是这个人的回 409。
+- `POST /internal/v1/knowmart/deliveries`：交一版过了两道门的专家（`delivery_id`、`owner_subject`、`knowbot_ref`、`manifest`）。按交付单号幂等：同一单号内容一样回 200，不一样回 409。版本号按清单里的记（knowlab 测试通过时定，可以有空号）。可带 `request_public: true`（knowlab 运营审核定了公开）：只有这样交来的版本才给别人看、给别人请，没带的那一版只给主人（Fable 评审 P2-2）；卖家发布主体与类目资质都过的，这一位进上架审核；没进的回包 `listing_status` 照实写为什么：`category_needed`（卖家还没在 knowmart 选类目）、`not_qualified`（资质没过）。
+- `POST /internal/v1/knowmart/owners/{owner}/knowbots/{knowbot_id}/versions/{version}/stop`：knowlab 停用某一版（那边用户或运营停的）。只认这个所有者的、knowlab 交来的（引用以 `knowlab-` 开头），别的与没有的都是 404；停过的再停照样 204。
+- `PUT /internal/v1/knowmart/owners/{owner}/sources/{knowbot_ref}/unlisted/{version}`，body `{"outcome": "declined" | "rejected"}`，只收 `knowlab-` 开头的引用：knowlab 交来没上架的那一版的结局（用户不要 / 运营审核没过），详情页写明空号那一版。按版本逐条写，结局是终态，重发、乱序都无害（Astra 评审 F08）；这个引用已交付过而主人不是这个人的回 409。
