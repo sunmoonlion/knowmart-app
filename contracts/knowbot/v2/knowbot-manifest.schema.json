@@ -1,0 +1,459 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.sunmoonai.com/knowmart/knowbot/v2/knowbot-manifest.schema.json",
+  "$defs": {
+    "DataNeed": {
+      "additionalProperties": false,
+      "description": "声明模板里的一样：类型、期间规则、格式、份数、必填、要的读法、来源限制、\n多候选时的优先策略、表格类的表与列；口径与说明只展示。",
+      "properties": {
+        "key": {
+          "pattern": "^[a-z][a-z0-9_]{0,39}$",
+          "title": "Key",
+          "type": "string"
+        },
+        "name": {
+          "maxLength": 80,
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "doc_type": {
+          "enum": [
+            "annual_report",
+            "semiannual_report",
+            "q1_report",
+            "q3_report",
+            "announcement",
+            "prospectus",
+            "policy",
+            "statistics",
+            "webpage",
+            "other_table",
+            "other_text"
+          ],
+          "title": "Doc Type",
+          "type": "string"
+        },
+        "period": {
+          "$ref": "#/$defs/PeriodRule"
+        },
+        "formats": {
+          "items": {
+            "enum": [
+              "pdf",
+              "excel",
+              "csv",
+              "text",
+              "markdown",
+              "html"
+            ],
+            "type": "string"
+          },
+          "maxItems": 6,
+          "minItems": 1,
+          "title": "Formats",
+          "type": "array"
+        },
+        "required": {
+          "default": true,
+          "title": "Required",
+          "type": "boolean"
+        },
+        "min_count": {
+          "default": 1,
+          "maximum": 200,
+          "minimum": 1,
+          "title": "Min Count",
+          "type": "integer"
+        },
+        "max_count": {
+          "default": 1,
+          "maximum": 200,
+          "minimum": 1,
+          "title": "Max Count",
+          "type": "integer"
+        },
+        "reading": {
+          "default": "original",
+          "enum": [
+            "original",
+            "text",
+            "pages",
+            "table"
+          ],
+          "title": "Reading",
+          "type": "string"
+        },
+        "sources": {
+          "default": [],
+          "items": {
+            "enum": [
+              "disclosure",
+              "collected",
+              "upload",
+              "output"
+            ],
+            "type": "string"
+          },
+          "maxItems": 4,
+          "title": "Sources",
+          "type": "array"
+        },
+        "priority": {
+          "anyOf": [
+            {
+              "enum": [
+                "public_first",
+                "upload_first",
+                "newest"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Priority"
+        },
+        "tables": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/DataTable"
+          },
+          "maxItems": 20,
+          "title": "Tables",
+          "type": "array"
+        },
+        "caliber": {
+          "anyOf": [
+            {
+              "maxLength": 200,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Caliber"
+        },
+        "description": {
+          "default": "",
+          "maxLength": 500,
+          "title": "Description",
+          "type": "string"
+        }
+      },
+      "required": [
+        "key",
+        "name",
+        "doc_type",
+        "period",
+        "formats"
+      ],
+      "title": "DataNeed",
+      "type": "object"
+    },
+    "DataTable": {
+      "additionalProperties": false,
+      "description": "表格类数据要有的一张表与几列（按表头的字认，不按位置）；CSV 不写表名。",
+      "properties": {
+        "sheet": {
+          "anyOf": [
+            {
+              "maxLength": 100,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Sheet"
+        },
+        "columns": {
+          "items": {
+            "maxLength": 100,
+            "minLength": 1,
+            "type": "string"
+          },
+          "maxItems": 50,
+          "minItems": 1,
+          "title": "Columns",
+          "type": "array"
+        }
+      },
+      "required": [
+        "columns"
+      ],
+      "title": "DataTable",
+      "type": "object"
+    },
+    "FrozenBinding": {
+      "additionalProperties": false,
+      "description": "作者绑给这位专家、交付时冻结的一份（SDD 0043 第 4.4 节）。\n\n数据留在 knowbase，这里只记引用：哪份资料、哪一版与摘要（要读法的再钉读法），\n凭的是 `expert:<专家>@<版本>`；别人请这位专家时按受益人授权读。",
+      "properties": {
+        "need": {
+          "anyOf": [
+            {
+              "pattern": "^[a-z][a-z0-9_]{0,39}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Need"
+        },
+        "material_id": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Material Id",
+          "type": "string"
+        },
+        "version_no": {
+          "minimum": 1,
+          "title": "Version No",
+          "type": "integer"
+        },
+        "sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        },
+        "rendition_kind": {
+          "anyOf": [
+            {
+              "enum": [
+                "text",
+                "pages",
+                "table",
+                "index",
+                "parse"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Rendition Kind"
+        },
+        "rendition_no": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Rendition No"
+        },
+        "rendition_sha256": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Rendition Sha256"
+        },
+        "basis_ref": {
+          "pattern": "^expert:[A-Za-z0-9._-]{1,64}@[0-9][0-9.]{0,31}$",
+          "title": "Basis Ref",
+          "type": "string"
+        }
+      },
+      "required": [
+        "material_id",
+        "version_no",
+        "sha256",
+        "basis_ref"
+      ],
+      "title": "FrozenBinding",
+      "type": "object"
+    },
+    "PeriodRule": {
+      "additionalProperties": false,
+      "description": "固定期间（start、end），最近 N 个完整的报告期（count，可加截至任务日期已披露），\n或不限期间（none，只给不是定期报告的）。",
+      "properties": {
+        "kind": {
+          "enum": [
+            "fixed",
+            "latest",
+            "none"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "start": {
+          "anyOf": [
+            {
+              "format": "date",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Start"
+        },
+        "end": {
+          "anyOf": [
+            {
+              "format": "date",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "End"
+        },
+        "count": {
+          "anyOf": [
+            {
+              "maximum": 10,
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Count"
+        },
+        "disclosed_by_task_date": {
+          "default": false,
+          "title": "Disclosed By Task Date",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "kind"
+      ],
+      "title": "PeriodRule",
+      "type": "object"
+    },
+    "RuleSource": {
+      "additionalProperties": false,
+      "description": "一条判断规则出自哪里（C-L1：投资逻辑只来自用户）。",
+      "properties": {
+        "rule": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Rule",
+          "type": "string"
+        },
+        "source": {
+          "enum": [
+            "user_text",
+            "user_confirmed"
+          ],
+          "title": "Source",
+          "type": "string"
+        },
+        "ref": {
+          "maxLength": 500,
+          "minLength": 1,
+          "title": "Ref",
+          "type": "string"
+        }
+      },
+      "required": [
+        "rule",
+        "source",
+        "ref"
+      ],
+      "title": "RuleSource",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "清单 v2（SDD 0043 第三、四节）：数据需求声明换成 v2（knowbase 的契约），\n作者绑定的数据只带冻结的引用；不再有 knowlab 数据集的绑定。",
+  "properties": {
+    "schema": {
+      "const": "knowbot-manifest/v2",
+      "title": "Schema",
+      "type": "string"
+    },
+    "name": {
+      "maxLength": 80,
+      "minLength": 1,
+      "title": "Name",
+      "type": "string"
+    },
+    "tagline": {
+      "default": "",
+      "maxLength": 200,
+      "title": "Tagline",
+      "type": "string"
+    },
+    "version": {
+      "pattern": "^[1-9][0-9]{0,5}$",
+      "title": "Version",
+      "type": "string"
+    },
+    "runtime": {
+      "pattern": "^[a-z][a-z0-9-]{0,31}$",
+      "title": "Runtime",
+      "type": "string"
+    },
+    "pack": {
+      "additionalProperties": true,
+      "title": "Pack",
+      "type": "object"
+    },
+    "data_needs": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/DataNeed"
+      },
+      "maxItems": 20,
+      "title": "Data Needs",
+      "type": "array"
+    },
+    "bindings": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/FrozenBinding"
+      },
+      "maxItems": 200,
+      "title": "Bindings",
+      "type": "array"
+    },
+    "rule_sources": {
+      "items": {
+        "$ref": "#/$defs/RuleSource"
+      },
+      "maxItems": 500,
+      "minItems": 1,
+      "title": "Rule Sources",
+      "type": "array"
+    }
+  },
+  "required": [
+    "schema",
+    "name",
+    "version",
+    "runtime",
+    "pack",
+    "rule_sources"
+  ],
+  "title": "knowbot-manifest v2 (outer envelope; `pack` is owned by the executor)",
+  "type": "object"
+}

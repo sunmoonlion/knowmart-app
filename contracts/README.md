@@ -16,6 +16,19 @@ JSON Schema 表达不了的跨字段规则以 knowmart 交付时的校验为准�
 
 不兼容的改动开新主版本目录，并留双版本并存期。
 
+## 分身清单 `knowbot/v2`（SDD 0043 第三、四节）
+
+- schema：`knowbot/v2/knowbot-manifest.schema.json`，摘要见同目录 `contract-manifest.json`；生成：`python -m app.domain.knowbots.schema 2`，后端测试核逐字一致
+- 和 v1 的不同：`data_needs` 是数据需求声明 v2（类型、期间规则、格式、份数、读法、来源限制、优先策略、表与列，真源是 knowbase 的 `knowbot-data-needs/v2`）；`bindings` 是作者绑给这位专家、交付时冻结的数据引用（资料、版本、摘要，要读法的钉读法，凭 `expert:<专家>@<版本>`），数据本身留在 knowbase；没有 `data_bindings`
+- 跨字段规则以交付时的校验为准：声明的 `key` 不重、`max_count` 不小于 `min_count`、表与列只给 Excel / CSV；同一份资料的同一版只绑一次；绑定上的 `need` 必须声明过；一份清单的绑定只冻结给一个专家版本
+- v1、v2 并存：`parse_manifest` 按 `schema` 分开解析；v1 的摘要一字不变
+
+## 调用方的锁
+
+| 文件 | 真源 | 说明 |
+| --- | --- | --- |
+| `knowbase-data-needs-lock.json` | `knowbase-app/contracts/knowbot-data-needs/v2/data-needs.schema.json` | 清单 v2 的声明照它写（`app/domain/knowbots/data_needs_v2.py`）；并列检出 knowbase-app 时 `tests/test_knowbase_data_needs_lock.py` 核锁与真源一致、本仓模型生成的 schema 与真源一致（不计说明文字）。词表一改真源摘要就变，要跟着改模型、更新锁 |
+
 ## 交付与停用（内部接口，服务关系 `knowmart:deliver`）
 
 knowlab 调，只认 knowlab 的服务身份（SDD 0027、0037 第十八之二节）：
