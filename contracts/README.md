@@ -2,30 +2,21 @@
 
 本目录是 knowmart 对外契约的唯一可改真源（SDD 0027）。调用方在自己父仓的 `contracts/` 放一份锁（契约名、主版本、schema 路径、sha256），升级时对比摘要。
 
-## 分身清单 `knowbot/v1`
-
-- schema：`knowbot/v1/knowbot-manifest.schema.json`，摘要见同目录 `contract-manifest.json`
-- 生成：由 `knowmart-backend` 的外层模型 `app/domain/knowbots/manifest.py` 生成（`python -m app.domain.knowbots.schema`），后端测试核文件与模型逐字一致，不要手改
-- 生产方：knowlab（工程化、验收后交付）；存放方：knowmart；执行方：knowbench 工作台
-
-只管**外层**：格式标识 `schema`、名字与说明、版本、`data_needs`（数据需求声明：请专家的人要提供哪几样数据，SDD 0042 第五节）、`data_bindings`（旧格式：这一版能读的用户数据）、`rule_sources`（每条判断规则出自用户原文还是用户确认过的改写，`C-L1`）。`pack` 是可执行部分（步骤、验收、底稿的形状），由执行方工作台拥有、按自己的模型完整校验，这里只要求它是带 `pack_id`、`version`、非空 `workflow` 的对象。
-
-JSON Schema 表达不了的跨字段规则以 knowmart 交付时的校验为准：`pack.version` 必须等于外层 `version`；同一数据集一版里只能绑一次；声明里每样的 `key` 不重、`max_count` 不小于 `min_count`、各样 `max_count` 合起来不超过 64、`tables` 只能写给 Excel / CSV；绑定上的 `need` 必须是声明过的 `key`；**写了声明的清单交到 knowmart 时不带绑定**（专家不绑数据，测试绑定只留在 knowlab）；外层规范 JSON 不超过 1 MB。
-
-`data_needs` 为空、绑定上没写 `need` 时，这两样不进规范 JSON：2026-10-23 加这两样之前交付的清单，摘要一字不变。摘要是外层规范 JSON（键排序、紧凑分隔、UTF-8）的 sha256，写作 `sha256:<十六进制>`；同一分身同一版本只认一份内容。
-
-不兼容的改动开新主版本目录，并留双版本并存期。
-
 ## 分身清单 `knowbot/v2`（SDD 0043 第三、四节）
 
 - schema：`knowbot/v2/knowbot-manifest.schema.json`，摘要见同目录 `contract-manifest.json`；生成：`python -m app.domain.knowbots.schema 2`，后端测试核逐字一致
 - 清单 v2 = 逻辑 + 作者挑选的数据（2026-10-28，decisions ⑭）：`bindings` 是作者挑选、交付时冻结的数据引用（资料、版本、摘要，要读法的钉读法，凭 `expert:<专家>@<版本>`），数据本身留在 knowbase；**没有数据需求声明**（每件委托要什么数据，由委托第 0 步用户自己的模型按专家逻辑和用户问题提出、用户确认，形状是 knowbase 的 `data-request/v1`，不进清单）；没有 `data_bindings`
 - 跨字段规则以交付时的校验为准：同一份资料的同一版只绑一次；一份清单的绑定只冻结给一个专家版本
-- v1、v2 并存：`parse_manifest` 按 `schema` 分开解析；v1 的摘要一字不变
+- 只管**外层**：格式标识 `schema`、名字与说明、版本、运行方、`bindings`、`rule_sources`（每条判断规则出自用户原文还是用户确认过的改写，`C-L1`）。`pack` 是可执行部分（步骤、验收、底稿的形状），由执行方工作台拥有、按自己的模型完整校验，这里只要求它是带 `pack_id`、`version`、非空 `workflow` 的对象，且 `pack.version` 等于外层 `version`；外层规范 JSON 不超过 1 MB
+- 摘要是外层规范 JSON（键排序、紧凑分隔、UTF-8）的 sha256，写作 `sha256:<十六进制>`；同一分身同一版本只认一份内容
+- 只收 v2（2026-10-28，decisions ⑰ 不留旧版兼容）：`knowbot/v1`（数据需求声明、knowlab 数据集绑定）契约已删，`parse_manifest` 不是 v2 就拒；以前交来的 v1 版本由迁移 `20261028_0010` 删掉，只剩 v1 版本的专家一并删，订单历史不动
+- 不兼容的改动开新主版本目录
 
 ## 调用方的锁
 
 本仓现在不锁别家的契约（2026-10-28 起清单 v2 不再带数据需求声明，原来锁 knowbase `knowbot-data-needs/v2` 的那把删了）。
+
+小店调 knowbase `user-data/v2`（SDD 0043 第 4.3 节）：写知识条目时凭用户本人令牌读 `GET /api/internal/v2/user-data/columns/knowmart`（用户在 knowbase 总栏交给 knowmart 的资料），成交后以服务关系 `knowbase:user-data-purchase` 调 `POST /api/internal/v2/user-data/purchases` 给买家建使用权（不复制）。用到的字段少，没有放锁；`user-data/v1` 已不再调用。
 
 ## 交付与停用（内部接口，服务关系 `knowmart:deliver`）
 
