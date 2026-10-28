@@ -1,7 +1,0 @@
-{
-  "provider": "knowbase-app",
-  "contract": "knowbot-data-needs",
-  "major_version": 2,
-  "schema": "contracts/knowbot-data-needs/v2/data-needs.schema.json",
-  "sha256": "f056b75a868b5670f1a9f97966198084b44c67c58f7b920159c016407ff7854c"
-}
