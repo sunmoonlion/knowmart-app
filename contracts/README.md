@@ -31,9 +31,16 @@
 
 knowlab 调，只认 knowlab 的服务身份（SDD 0027、0037 第十八之二节）：
 
-- `POST /internal/v1/knowmart/deliveries`：交一版过了两道门的专家（请求体是契约 `knowbot-delivery/v1`，见上一节）。按交付单号幂等：同一单号内容一样（含申请公开与否、类目）回 200，不一样回 409。版本号按清单里的记（knowlab 测试通过时定，可以有空号）。可带 `request_public: true`（knowlab 运营审核定了公开）：只有这样交来的版本才给别人看、给别人请，没带的那一版只给主人（Fable 评审 P2-2）；卖家发布主体与类目资质都过的，这一位进上架审核；没进的回包 `listing_status` 照实写为什么：`category_needed`（卖家还没在 knowmart 选类目）、`not_qualified`（资质没过）。
+- `POST /internal/v1/knowmart/deliveries`：交一版过了两道门的专家（请求体是契约 `knowbot-delivery/v1`，见上一节）。按交付单号幂等：同一单号内容一样（含申请公开与否、类目）回 200，不一样回 409。版本号按清单里的记（knowlab 测试通过时定，可以有空号）。可带 `request_public: true`（knowlab 运营审核定了公开）：只有这样交来的版本才给别人看、给别人请，没带的那一版只给主人（Fable 评审 P2-2）；卖家发布主体与类目资质都过的，这一位进上架审核；没进的回包 `listing_status` 照实写为什么：`category_needed`（卖家还没在 knowmart 选类目）、`not_qualified`（资质没过）、`shop_suspended`（卖家小店被平台暂停）。
 - `POST /internal/v1/knowmart/owners/{owner}/knowbots/{knowbot_id}/versions/{version}/stop`：knowlab 停用某一版（那边用户或运营停的）。只认这个所有者的、knowlab 交来的（引用以 `knowlab-` 开头），别的与没有的都是 404；停过的再停照样 204。
 - `POST /internal/v1/knowmart/owners/{owner}/knowbots/{knowbot_id}/versions/{version}/withdraw-public`：knowlab 收回某一版的公开（自用转公开撤回撞上已收下时调）。只撤掉这一版的 `public_allowed`，保留作者的自用上架；这一位没有别的可公开版本且条目非平台下架时，一并退回自用（`listing_status='self'`、`visibility='private'`）；撤过的再撤照样 204。
 
 - `GET /internal/v1/knowmart/owners/{owner}/sources/{knowbot_ref}/versions`：knowlab 取回它交来的各版现在怎样（`version`、`status` 为 active / held / stopped、`held_reason`、`public_allowed`），在 knowlab 专家栏照实写待处理与原因；只收 `knowlab-` 开头的引用，别人的回空。
 - `PUT /internal/v1/knowmart/owners/{owner}/sources/{knowbot_ref}/unlisted/{version}`，body `{"outcome": "declined" | "rejected"}`，只收 `knowlab-` 开头的引用：knowlab 交来没上架的那一版的结局（用户不要 / 运营审核没过），详情页写明空号那一版。按版本逐条写，结局是终态，重发、乱序都无害（Astra 评审 F08）；这个引用已交付过而主人不是这个人的回 409。
+
+
+## 内部接口：AI 请专家与需求（服务关系 `knowmart:catalog`、`knowmart:demand`、`knowmart:summon`）
+
+- `GET /internal/v1/knowmart/owners/{owner}/catalog`：执行方以服务身份替用户找专家，只回本人可用（自用或公开且未停店）的专家版本列表。
+- `POST /internal/v1/knowmart/owners/{owner}/demands`：执行方以服务身份替用户发需求，匿名进入需求大厅。
+- `POST /internal/v1/knowmart/knowbots/{knowbot_id}/versions/{version}/summon`：执行方为用户请专家时调用，系统记一笔成交（同一用户同一版按部分唯一索引只记一次，价格按条目标价，自己请自己的不记）。
