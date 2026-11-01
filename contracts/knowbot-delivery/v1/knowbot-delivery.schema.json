@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.sunmoonai.com/knowmart/knowbot-delivery/v1/knowbot-delivery.schema.json",
+  "additionalProperties": false,
+  "description": "knowlab 交一版过了两道门的专家（服务关系 `knowmart:deliver`）。",
+  "properties": {
+    "delivery_id": {
+      "maxLength": 128,
+      "minLength": 8,
+      "title": "Delivery Id",
+      "type": "string"
+    },
+    "owner_subject": {
+      "maxLength": 512,
+      "minLength": 1,
+      "title": "Owner Subject",
+      "type": "string"
+    },
+    "knowbot_ref": {
+      "maxLength": 128,
+      "minLength": 1,
+      "title": "Knowbot Ref",
+      "type": "string"
+    },
+    "manifest": {
+      "additionalProperties": true,
+      "title": "Manifest",
+      "type": "object"
+    },
+    "request_public": {
+      "default": false,
+      "title": "Request Public",
+      "type": "boolean"
+    },
+    "category": {
+      "anyOf": [
+        {
+          "enum": [
+            "finance.securities_advisory",
+            "finance.public_fund",
+            "finance.private_fund",
+            "tools.office",
+            "tools.lookup",
+            "tools.calculator",
+            "business.management"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Category"
+    }
+  },
+  "required": [
+    "delivery_id",
+    "owner_subject",
+    "knowbot_ref",
+    "manifest"
+  ],
+  "title": "knowbot-delivery v1 (knowlab delivers an expert version)",
+  "type": "object"
+}

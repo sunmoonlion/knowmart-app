@@ -1,0 +1,6 @@
+{
+  "contract": "knowbot-delivery",
+  "major_version": 1,
+  "schema": "knowbot-delivery.schema.json",
+  "sha256": "94ae64485b00af71c8329f3a2489fbbc714ecf02d9d30b7dd89bd4c76134be4e"
+}
