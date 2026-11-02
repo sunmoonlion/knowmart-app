@@ -1,0 +1,183 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.sunmoonai.com/knowmart/knowbot/v3/knowbot-manifest.schema.json",
+  "$defs": {
+    "FrozenBinding": {
+      "additionalProperties": false,
+      "description": "作者挑选、交付时冻结的一份（SDD 0043 第 4.4 节）。\n\n数据留在 knowbase，这里只记引用：哪份资料、哪一版与摘要（要读法的再钉读法），\n凭的是 `expert:<专家>@<版本>`；别人请这位专家时按受益人授权读。",
+      "properties": {
+        "material_id": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Material Id",
+          "type": "string"
+        },
+        "version_no": {
+          "minimum": 1,
+          "title": "Version No",
+          "type": "integer"
+        },
+        "sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        },
+        "rendition_kind": {
+          "anyOf": [
+            {
+              "enum": [
+                "text",
+                "pages",
+                "table",
+                "index",
+                "parse"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Rendition Kind"
+        },
+        "rendition_no": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Rendition No"
+        },
+        "rendition_sha256": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Rendition Sha256"
+        },
+        "basis_ref": {
+          "pattern": "^expert:[A-Za-z0-9._-]{1,64}@[0-9][0-9.]{0,31}$",
+          "title": "Basis Ref",
+          "type": "string"
+        }
+      },
+      "required": [
+        "material_id",
+        "version_no",
+        "sha256",
+        "basis_ref"
+      ],
+      "title": "FrozenBinding",
+      "type": "object"
+    },
+    "RuleSource": {
+      "additionalProperties": false,
+      "description": "一条判断规则出自哪里（C-L1：投资逻辑只来自用户）。",
+      "properties": {
+        "rule": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Rule",
+          "type": "string"
+        },
+        "source": {
+          "enum": [
+            "user_text",
+            "user_confirmed"
+          ],
+          "title": "Source",
+          "type": "string"
+        },
+        "ref": {
+          "maxLength": 500,
+          "minLength": 1,
+          "title": "Ref",
+          "type": "string"
+        }
+      },
+      "required": [
+        "rule",
+        "source",
+        "ref"
+      ],
+      "title": "RuleSource",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "动态作者方法目录；任务计划由运行方另存，不能混进发布清单。",
+  "properties": {
+    "schema": {
+      "const": "knowbot-manifest/v3",
+      "title": "Schema",
+      "type": "string"
+    },
+    "name": {
+      "maxLength": 80,
+      "minLength": 1,
+      "title": "Name",
+      "type": "string"
+    },
+    "tagline": {
+      "default": "",
+      "maxLength": 200,
+      "title": "Tagline",
+      "type": "string"
+    },
+    "version": {
+      "pattern": "^[1-9][0-9]{0,5}$",
+      "title": "Version",
+      "type": "string"
+    },
+    "runtime": {
+      "pattern": "^[a-z][a-z0-9-]{0,31}$",
+      "title": "Runtime",
+      "type": "string"
+    },
+    "pack": {
+      "additionalProperties": true,
+      "title": "Pack",
+      "type": "object"
+    },
+    "bindings": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/FrozenBinding"
+      },
+      "maxItems": 200,
+      "title": "Bindings",
+      "type": "array"
+    },
+    "rule_sources": {
+      "items": {
+        "$ref": "#/$defs/RuleSource"
+      },
+      "maxItems": 500,
+      "minItems": 1,
+      "title": "Rule Sources",
+      "type": "array"
+    }
+  },
+  "required": [
+    "schema",
+    "name",
+    "version",
+    "runtime",
+    "pack",
+    "rule_sources"
+  ],
+  "title": "knowbot-manifest v3 (outer envelope; `pack` is owned by the executor)",
+  "type": "object"
+}

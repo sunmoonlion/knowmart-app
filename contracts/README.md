@@ -44,3 +44,8 @@ knowlab 调，只认 knowlab 的服务身份（SDD 0027、0037 第十八之二�
 - `GET /internal/v1/knowmart/owners/{owner}/catalog`：执行方以服务身份替用户找专家，只回本人可用（自用或公开且未停店）的专家版本列表。
 - `POST /internal/v1/knowmart/owners/{owner}/demands`：执行方以服务身份替用户发需求，匿名进入需求大厅。
 - `POST /internal/v1/knowmart/knowbots/{knowbot_id}/versions/{version}/summon`：执行方为用户请专家时调用，系统记一笔成交（同一用户同一版按部分唯一索引只记一次，价格按条目标价，自己请自己的不记）。
+# WP-10 动态方法清单（开发中，未发布）
+
+新增 `knowbot/v3/`，由后端 `KnowbotManifestV3` 生成，入口 `python -m app.domain.knowbots.schema 3`。v3 要求 `pack.runtime_contract = knowbench/dynamic-methods/v1`、非空 `method_units` 与 `planning`，拒绝混入固定 workflow。完整目录规则由 knowbench 拥有，商城继续只核外层与最小骨架，保留原授权与不可变交付流程。
+
+v2 schema 逐字不变，旧清单规范 JSON 与摘要保持兼容；v1 继续拒绝。knowlab 与 knowbench 同步持有 v3 消费锁。当前动态执行尚未接通，不把清单可以存取当作业务验收通过。

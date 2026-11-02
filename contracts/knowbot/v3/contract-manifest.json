@@ -1,0 +1,6 @@
+{
+  "contract": "knowbot-manifest",
+  "major_version": 3,
+  "schema": "knowbot-manifest.schema.json",
+  "sha256": "046733f04436c11d0208ddd10b2e51148bceb3d58664b13028a7866efcf35bf5"
+}
