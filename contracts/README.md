@@ -49,3 +49,5 @@ knowlab 调，只认 knowlab 的服务身份（SDD 0027、0037 第十八之二�
 新增 `knowbot/v3/`，由后端 `KnowbotManifestV3` 生成，入口 `python -m app.domain.knowbots.schema 3`。v3 要求 `pack.runtime_contract = knowbench/dynamic-methods/v1`、非空 `method_units` 与 `planning`，拒绝混入固定 workflow。完整目录规则由 knowbench 拥有，商城继续只核外层与最小骨架，保留原授权与不可变交付流程。
 
 v2 schema 逐字不变，旧清单规范 JSON 与摘要保持兼容；v1 继续拒绝。knowlab 与 knowbench 同步持有 v3 消费锁。当前动态执行尚未接通，不把清单可以存取当作业务验收通过。
+
+WP-10 方法引用（开发契约，未发布）：v3 外层允许运行契约 `knowbench/dynamic-methods/v2`，要求非空 `method_sources`；v1 不接受引用字段。商城完整冻结清单、保持交付摘要，不编辑方法来源或重新编译。语义编译由 knowlab 负责，运行校验由 knowbench 负责，旧固定 v2 摘要不变。
