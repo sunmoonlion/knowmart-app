@@ -1,0 +1,204 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.sunmoonai.com/knowmart/expert-directory/v2/catalog.schema.json",
+  "$defs": {
+    "PublicCapability": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,47}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "statement": {
+          "maxLength": 2000,
+          "minLength": 1,
+          "title": "Statement",
+          "type": "string"
+        },
+        "conditions": {
+          "items": {
+            "maxLength": 2000,
+            "minLength": 1,
+            "type": "string"
+          },
+          "maxItems": 30,
+          "title": "Conditions",
+          "type": "array"
+        },
+        "exclusions": {
+          "items": {
+            "maxLength": 2000,
+            "minLength": 1,
+            "type": "string"
+          },
+          "maxItems": 30,
+          "title": "Exclusions",
+          "type": "array"
+        },
+        "delivers": {
+          "items": {
+            "maxLength": 2000,
+            "minLength": 1,
+            "type": "string"
+          },
+          "maxItems": 30,
+          "minItems": 1,
+          "title": "Delivers",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "statement",
+        "conditions",
+        "exclusions",
+        "delivers"
+      ],
+      "title": "PublicCapability",
+      "type": "object"
+    },
+    "PublicExpert": {
+      "additionalProperties": false,
+      "properties": {
+        "knowbot_id": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Knowbot Id",
+          "type": "string"
+        },
+        "version": {
+          "pattern": "^[1-9][0-9]{0,5}$",
+          "title": "Version",
+          "type": "string"
+        },
+        "digest": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Digest",
+          "type": "string"
+        },
+        "name": {
+          "maxLength": 80,
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "tagline": {
+          "maxLength": 200,
+          "title": "Tagline",
+          "type": "string"
+        },
+        "scope": {
+          "$ref": "#/$defs/Scope"
+        },
+        "declaration": {
+          "enum": [
+            "scope/v1",
+            "capabilities/v1"
+          ],
+          "title": "Declaration",
+          "type": "string"
+        },
+        "runtime_contract": {
+          "enum": [
+            "knowbench/fixed/v1",
+            "knowbench/dynamic-methods/v1",
+            "knowbench/dynamic-methods/v2",
+            "knowbench/dynamic-methods/v3"
+          ],
+          "title": "Runtime Contract",
+          "type": "string"
+        },
+        "public_capabilities": {
+          "items": {
+            "$ref": "#/$defs/PublicCapability"
+          },
+          "maxItems": 30,
+          "title": "Public Capabilities",
+          "type": "array"
+        },
+        "free": {
+          "title": "Free",
+          "type": "boolean"
+        },
+        "price": {
+          "anyOf": [
+            {
+              "maxLength": 32,
+              "pattern": "^[0-9]+(\\.[0-9]+)?$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Price"
+        }
+      },
+      "required": [
+        "knowbot_id",
+        "version",
+        "digest",
+        "name",
+        "tagline",
+        "scope",
+        "declaration",
+        "runtime_contract",
+        "public_capabilities",
+        "free",
+        "price"
+      ],
+      "title": "PublicExpert",
+      "type": "object"
+    },
+    "Scope": {
+      "additionalProperties": false,
+      "properties": {
+        "does": {
+          "default": "",
+          "title": "Does",
+          "type": "string"
+        },
+        "does_not": {
+          "default": "",
+          "title": "Does Not",
+          "type": "string"
+        },
+        "elsewhere": {
+          "default": "",
+          "title": "Elsewhere",
+          "type": "string"
+        }
+      },
+      "title": "Scope",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "contract": {
+      "const": "knowmart/expert-directory/v2",
+      "title": "Contract",
+      "type": "string"
+    },
+    "complete": {
+      "title": "Complete",
+      "type": "boolean"
+    },
+    "experts": {
+      "items": {
+        "$ref": "#/$defs/PublicExpert"
+      },
+      "maxItems": 1000,
+      "title": "Experts",
+      "type": "array"
+    }
+  },
+  "required": [
+    "contract",
+    "complete",
+    "experts"
+  ],
+  "title": "ExpertDirectory",
+  "type": "object"
+}
