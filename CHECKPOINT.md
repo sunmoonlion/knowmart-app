@@ -19,3 +19,18 @@ knowlab/knowbench 的 v3 锁同步交付，不能靠伪造非空 workflow 绕过
 相对 #52：父仓 8f7d720、前端 10b80aa 均为本候选祖先；后端 364523b 与管理端
 5f10911 原样。只有 web 镜像增量，无后端代码/迁移/专家资产入库/运行时开关变化。
 纳入原 Wind/年报/数据 MCP 同一交接，qwen 经 Jenkins 发版，生产 UI 验收待发布。
+
+## 2026-11-03 专家换类目后公开资格回归修复
+
+基于已发布 #67：父仓 3667c936、后端 09cf025；本次只推进 knowmart 后端
+3248562。没有合入已撤回的方法供需候选，也没有改固定专家内容或执行规则。
+
+真实故障：财务专家第3版交付把全局类目改为 finance.securities_advisory，
+旧 listing_status=public 被直接沿用；作者可请，普通用户被当前资质门拒绝。
+修复：交付换类目撤销旧类目的公开状态并重新申请；作者改公开类目进入待审；
+交付重放前核当前资质/停店，不以旧 public/pending 跳过核验，保留 taken_down。
+
+隔离 PostgreSQL（luna_market_tests、每测试独立 schema）回归87项通过，覆盖
+market、repository、service、routes、shop；ruff/pyright通过。无线上数据写入、
+无模型调用。应用发布交 Qwen；用户通过现有商城作者/运营界面重新分类审核，
+不需要等待代码发布。后续验收必须含非所有者的真实请用检查，不能仅核 public 字段。
